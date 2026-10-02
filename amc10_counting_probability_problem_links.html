@@ -28,7 +28,7 @@ main{padding:22px 0 56px}.jump{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 25
 .contest{background:#fff;border:1px solid #d7e3e8;border-radius:12px;padding:20px 22px;margin:12px 0;box-shadow:0 4px 14px #18314909}
 .contest h3{font-size:1.05rem;margin:0 0 13px}.contest .count{color:#657a86;font-weight:400;font-size:.85rem;margin-left:6px}
 .links{display:flex;flex-wrap:wrap;gap:9px}.problem{display:inline-flex;align-items:center;justify-content:center;min-width:104px;text-decoration:none;font-size:.92rem;font-weight:600;border:1px solid #bad3d9;border-radius:8px;background:#f3fafb;padding:9px 12px;transition:background .15s,border-color .15s}
-.problem:hover{background:#dbeff2;border-color:#6aabb7}.problem::after{content:'↗';font-size:.8em;margin-left:7px;color:#5a8d98}
+.problem:hover{background:#dbeff2;border-color:#6aabb7}.problem.opened{background:#ffe3a3;border-color:#d28a16;color:#684000;box-shadow:inset 0 0 0 1px #d28a16}.problem.opened:hover{background:#ffd77a}.problem::after{content:'↗';font-size:.8em;margin-left:7px;color:#5a8d98}
 .empty{display:none;padding:40px 0;color:#526b78}.notes{border-top:1px solid #d7e3e8;color:#526b78;line-height:1.55;padding:24px 0 36px;font-size:.9rem}
 .notes p{margin:7px 0}.hidden{display:none!important}
 @media(max-width:570px){.wrap{padding:0 16px}header{padding:35px 0}.toolbar{position:static}.shown{margin-left:0;width:100%}.contest{padding:16px}.problem{min-width:calc(50% - 5px)}}
@@ -84,5 +84,30 @@ function update(){
 }
 search.addEventListener('input',update);
 yearFilter.addEventListener('change',update);
+const openedStorageKey='amc-opened-problem';
+let openedProblem='';
+try{
+  openedProblem=localStorage.getItem(openedStorageKey)||'';
+  if(!openedProblem){
+    const previous=JSON.parse(localStorage.getItem('amc-opened-problems')||'[]');
+    if(Array.isArray(previous))openedProblem=previous.at(-1)||'';
+  }
+}catch{}
+function problemKey(link){return link.href}
+function markOpened(event){
+  const link=event.target.closest('.problem');
+  if(!link)return;
+  document.querySelector('.problem.opened')?.classList.remove('opened');
+  link.classList.add('opened');
+  try{
+    localStorage.setItem(openedStorageKey,problemKey(link));
+    localStorage.removeItem('amc-opened-problems');
+  }catch{}
+}
+for(const link of document.querySelectorAll('.problem')){
+  if(problemKey(link)===openedProblem)link.classList.add('opened');
+}
+document.addEventListener('click',markOpened);
+document.addEventListener('contextmenu',markOpened);
 </script>
 </body></html>
